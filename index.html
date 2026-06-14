@@ -80,14 +80,14 @@ button:disabled{
     <div class="title">ZEION HUB</div>
 
     <div class="info" id="status">
-        Watch 5 ads to get key
+        Click Start and wait 20 seconds to get key
     </div>
 
     <div class="key" id="keyBox">
         No Key
     </div>
 
-    <button id="btn" onclick="watchAd()">
+    <button id="btn" onclick="startTimer()">
         Start
     </button>
     
@@ -97,9 +97,9 @@ button:disabled{
 </div>
 
 <script>
-const TOTAL_ADS = 5;
-let adsWatched = 0;
+let timeLeft = 20; // กำหนดเวลานับถอยหลัง 20 วินาที
 let generatedKey = "";
+let timerInterval = null;
 
 function generateKey(length=32){
     const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
@@ -110,33 +110,36 @@ function generateKey(length=32){
     return result;
 }
 
-function watchAd(){
+function startTimer(){
     const btn = document.getElementById("btn");
+    const status = document.getElementById("status");
+    
     btn.disabled = true;
+    status.innerText = "Please wait " + timeLeft + " seconds...";
 
-    window.open("https://example.com", "_blank");
-
-    document.getElementById("status").innerText = "Waiting 2 seconds...";
-
-    setTimeout(()=>{
-        adsWatched++;
-
-        if(adsWatched < TOTAL_ADS){
-            document.getElementById("status").innerText = "Ads watched: " + adsWatched + "/" + TOTAL_ADS;
-            btn.innerText = "Watch Ad " + (adsWatched + 1);
-            btn.disabled = false;
+    // เริ่มระบบนับถอยหลังทีละ 1 วินาที
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        
+        if (timeLeft > 0) {
+            status.innerText = "Please wait " + timeLeft + " seconds...";
+            btn.innerText = "Processing (" + timeLeft + "s)";
         } else {
+            // เมื่อเวลาหมด (ครบ 20 วิ)
+            clearInterval(timerInterval);
+            
             generatedKey = generateKey();
 
             document.getElementById("keyBox").innerText = generatedKey;
-            document.getElementById("status").innerText = "Key generated successfully! Copy and redeem in Discord.";
+            status.innerText = "Key generated successfully! Copy and redeem in Discord.";
             
             btn.innerText = "Done!";
             btn.disabled = true;
 
+            // แสดงปุ่ม Copy Key
             document.getElementById("copyBtn").style.display = "block";
         }
-    }, 2000);
+    }, 1000);
 }
 
 function copyKey() {
@@ -144,12 +147,12 @@ function copyKey() {
     
     const copyBtn = document.getElementById("copyBtn");
 
-    // วิธีที่ 1: ใช้ Clipboard API ตัวใหม่
+    // แผนที่ 1: คัดลอกแบบใหม่
     navigator.clipboard.writeText(generatedKey).then(() => {
         copyBtn.innerText = "✅ Copied!";
         setTimeout(() => { copyBtn.innerText = "📋 Copy Key"; }, 2000);
     }).catch(err => {
-        // วิธีที่ 2 (Fallback): หากวิธีแรกถูกเบราว์เซอร์บล็อกสิทธิ์ (ไม่มี alert เด้งกวนใจแล้ว)
+        // แผนที่ 2: คัดลอกแบบเก่า (Fallback ป้องกันข้อความแจ้งเตือนเด้งหลุด)
         try {
             const textArea = document.createElement("textarea");
             textArea.value = generatedKey;
@@ -177,4 +180,3 @@ function copyKey() {
 
 </body>
 </html>
-  
