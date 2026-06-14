@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zeion Hub - Get Key</title>
+
+<style>
+body{
+    margin:0;
+    background:#0d1117;
+    color:white;
+    font-family:Arial;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.box{
+    width:400px;
+    background:#161b22;
+    border-radius:20px;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 0 25px rgba(0,119,255,.4);
+}
+
+.title{
+    font-size:32px;
+    font-weight:bold;
+    background:linear-gradient(90deg,#00bfff,#0066ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.info{
+    margin:15px 0;
+    color:#8b949e;
+}
+
+.key{
+    background:#0d1117;
+    border:1px solid #0066ff;
+    padding:15px;
+    border-radius:10px;
+    word-break:break-all;
+    margin-bottom:15px;
+    font-family: monospace;
+    font-size: 18px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    background:linear-gradient(90deg,#00bfff,#0066ff);
+    margin-bottom: 10px;
+}
+
+button:disabled{
+    opacity:.5;
+    cursor: not-allowed;
+}
+
+.btn-copy {
+    background: linear-gradient(90deg, #4caf50, #2e7d32);
+    display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="box">
+    <div class="title">ZEION HUB</div>
+
+    <div class="info" id="status">
+        Watch 5 ads to get key
+    </div>
+
+    <div class="key" id="keyBox">
+        No Key
+    </div>
+
+    <button id="btn" onclick="watchAd()">
+        Start
+    </button>
+    
+    <button id="copyBtn" class="btn-copy" onclick="copyKey()">
+        📋 Copy Key
+    </button>
+</div>
+
+<script>
+const TOTAL_ADS = 5;
+let adsWatched = 0;
+let generatedKey = "";
+
+function generateKey(length=32){
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
+    let result = "";
+    for(let i=0;i<length;i++){
+        result += chars[Math.floor(Math.random()*chars.length)];
+    }
+    return result;
+}
+
+function watchAd(){
+    const btn = document.getElementById("btn");
+    btn.disabled = true;
+
+    window.open("https://example.com", "_blank");
+
+    document.getElementById("status").innerText = "Waiting 2 seconds...";
+
+    setTimeout(()=>{
+        adsWatched++;
+
+        if(adsWatched < TOTAL_ADS){
+            document.getElementById("status").innerText = "Ads watched: " + adsWatched + "/" + TOTAL_ADS;
+            btn.innerText = "Watch Ad " + (adsWatched + 1);
+            btn.disabled = false;
+        } else {
+            generatedKey = generateKey();
+
+            document.getElementById("keyBox").innerText = generatedKey;
+            document.getElementById("status").innerText = "Key generated successfully! Copy and redeem in Discord.";
+            
+            btn.innerText = "Done!";
+            btn.disabled = true;
+
+            document.getElementById("copyBtn").style.display = "block";
+        }
+    }, 2000);
+}
+
+function copyKey() {
+    if(!generatedKey) return;
+    
+    const copyBtn = document.getElementById("copyBtn");
+
+    // วิธีที่ 1: ใช้ Clipboard API ตัวใหม่
+    navigator.clipboard.writeText(generatedKey).then(() => {
+        copyBtn.innerText = "✅ Copied!";
+        setTimeout(() => { copyBtn.innerText = "📋 Copy Key"; }, 2000);
+    }).catch(err => {
+        // วิธีที่ 2 (Fallback): หากวิธีแรกถูกเบราว์เซอร์บล็อกสิทธิ์ (ไม่มี alert เด้งกวนใจแล้ว)
+        try {
+            const textArea = document.createElement("textarea");
+            textArea.value = generatedKey;
+            textArea.style.position = "fixed"; 
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            if (successful) {
+                copyBtn.innerText = "✅ Copied!";
+            } else {
+                copyBtn.innerText = "❌ Copy Failed";
+            }
+        } catch (fallbackErr) {
+            copyBtn.innerText = "❌ Not Allowed";
+        }
+
+        setTimeout(() => { copyBtn.innerText = "📋 Copy Key"; }, 2000);
+    });
+}
+</script>
+
+</body>
+</html>
+  
